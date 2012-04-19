@@ -1,0 +1,161 @@
+OS X 10.6 Audit/Remediation Script Package
+Based on DISA Mac OS X 10.6 STIG Draft, Version 1, Release .01, 18 Aug 2011
+Copyright 2011, Jacqueline Singh
+
+Instructions:
+
+1. Login to Mac OS X machine you wish to check/remediate for STIG compliance;
+
+2. Copy the entire "OSX-10.6-SRR-Basic" folder to your Desktop;
+
+3. Recommend you quickly review/skim over the below tech tips;
+
+4. Run the "Terminal" application (It is in the Applications/Utilities folder);
+
+5. Enter the following commands (verbatim) in the Terminal window:
+	3a) sudo su
+	3b) cd "/Users/$SUDO_USER/Desktop/OSX-10.6-SRR"
+	3c) mkdir logs-$HOSTNAME
+	3d) chmod +x script.sh bin/part1.sh bin/part2.sh bin/part3.sh
+	3e) TODAYSDATE=`date +%d-%b-%Y.%H%M` 
+	3f) system_profiler > logs-$HOSTNAME/system_profiler_$TODAYSDATE.log
+	3g) ./script.sh 2>&1 | tee logs-$HOSTNAME/script.$TODAYSDATE.log
+
+
+------------------------------------------------------
+[PREREQ] Recovery
+------------------------------------------------------
+Recommend installing 'applejack' (http://applejack.sourceforge.net), to ensure you have an easy way to fix problems in single user mode, should they occur (they will most likely occur). You can enter single-user mode by holding down 'command key + s' on boot.
+
+------------------------------------------------------
+[TECH TIP] Sudo setuid bit
+------------------------------------------------------
+If you mess up and can't sudo to root anymore, run 'applejack' in single-user mode. WARNING: If you run 'applejack' without booting into single-user mode, you could bork the entire system!
+
+------------------------------------------------------
+[IAVA PREREQ] MacPorts and XCode
+------------------------------------------------------
+For IAVA compliance, you will need to install MacPorts to upgrade (at a minimum) OpenSSL (openssl version; port install openssl) and PHP (php -v; port install php5). To install MacPorts, you will need XCode first, which is available on the OS X Install DVD (OEM). You can also download the .dmg (disk image) from Apple.
+
+------------------------------------------------------
+[IAVA PREREQ] Retina
+------------------------------------------------------
+To scan with Retina, you will need to enable the SSH daemon (SSHD) in "System Preferences" --> Sharing (disable when complete); you must add an entry for the Retina server in /etc/hosts; and ensure you turn off the firewall before scanning and re-enable when complete.
+
+------------------------------------------------------
+[TECH TIP] Software utilities you might need
+------------------------------------------------------
+1. BatChmod;
+2. MacPorts;
+3. AppleJack (mentioned above);
+4. Disk Inventory X.
+
+Google them.
+
+------------------------------------------------------
+[TECH TIP] IAVA Updates
+------------------------------------------------------
+1. Update all system software;
+2. Update approved third-party software;
+3. Ensure Adobe products such as flash and Acrobat Reader/Pro are upgraded.
+
+------------------------------------------------------
+[TECH TIP] Logging
+------------------------------------------------------
+Your logs will not be overwritten, even if you have to ctrl+c/break out of the script. Each will be date/time stamped for your review and will be available in the logs/ directory. However be advised they may become very large if the script hangs and you must forcefully kill terminal, and the child process continues to output error data.
+
+------------------------------------------------------
+[TECH TIP] Script Sequence
+------------------------------------------------------
+The script is split into three parts (part1, part2, part3). The main script.sh will take you through all three in sequence, although you may wish to run them individually.
+
+------------------------------------------------------
+[TECH TIP] Using 'locate' instead of 'find'
+------------------------------------------------------
+Run this command to update the "locate" database (optional) launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist
+
+------------------------------------------------------
+[TECH TIP] Kext Cache
+------------------------------------------------------
+This command will rebuild the extension cache (in case something breaks) kextcache -m Extensions.mkext -z /System/Library/Extensions
+
+------------------------------------------------------
+[TECH TIP] Disable internal mic
+------------------------------------------------------
+Disable the internal microphone by reducing the input volume to 0
+* Launch System Preferences
+* Click on "Sound"
+* Click on the "Input" tab
+* Drag the "Input volume" slider all the way to the left, as seen in the above screenshot
+* Close System Preferences
+
+Disable the internal microphone by selecting a different audio input
+* Launch the System Preferences
+* Click on "Sound"
+* Click on the "Input" tab
+* Select "Line-in"
+* Close System Preferences
+
+Additionally recommend vinyl label tape over microphone with text stating:
+"Microphone Disabled per IA; POC: J6 Information Assurance DSN:"
+
+------------------------------------------------------
+[TECH TIP] Disable internal camera
+------------------------------------------------------
+To disable: mv /System/Library/PrivateFrameworks/CoreMediaIOServices.framework/Versions/A/Resources/VDC.plugin/Contents/MacOS/VDC /System/Library/PrivateFrameworks/CoreMediaIOServices.framework/Versions/A/Resources/VDC.plugin/Contents/MacOS/_VDC
+
+To enable: mv /System/Library/PrivateFrameworks/CoreMediaIOServices.framework/Versions/A/Resources/VDC.plugin/Contents/MacOS/_VDC /System/Library/PrivateFrameworks/CoreMediaIOServices.framework/Versions/A/Resources/VDC.plugin/Contents/MacOS/VDC
+
+Additionally recommend vinyl label tape over camera with text stating:
+"Camera Disabled per IA; POC: J6 Information Assurance DSN:"
+
+------------------------------------------------------
+[TECH TIP] Accounts
+------------------------------------------------------
+1. Add user xAdministrator, set password to meet system reqs
+2. Ensure "xAdministrator" user has administrative privilege
+3. Add password to user "user account" set password to meet system reqs
+4. Downgrade "user account" account to have standard, non-administrative privilege
+5. Ensure "Guest" account is disabled and no other accounts exist on the workstation (confirm with unit prior to deletion to ensure no data loss)
+
+1. System Preferences --> Security --> General
+2. Disable Automatic Login should be on
+3. Require password to unlock System Prefs pane should be on
+4. Disable location services should be on
+5. Require password "immediately" after sleep or screen saver begins
+6. Enable secure virtual memory.
+
+------------------------------------------------------
+[TECH TIP] Firewall
+------------------------------------------------------
+1. System Preferences --> Security --> Firewall
+2. Enable/start the firewall, and block all incoming connections except required.
+
+------------------------------------------------------
+[TECH TIP] Disable access to System Preferences
+------------------------------------------------------
+1. Disable access: sudo chmod 700 /Applications/System\ Preferences.app
+2. Enable access: sudo chmod 774 /Applications/System\ Preferences.app
+
+------------------------------------------------------
+[TECH TIP] Background, Login Background, & Screen Saver
+------------------------------------------------------
+1. Create folder in xAdministrator Documents folder titled "DONOTDELETE"
+2. Copy YourUnitBackground.jpg to "DONOTDELETE"
+3. Set YourUnitBackground.jpg as desktop background
+4. Set screen saver to choose from "DONODELETE" folder
+5. Change login background:
+5a. cd /System/Library/CoreServices
+5b. mv DefaultDesktop.jpg DefaultDesktop_old.jpg
+5c. cp /Users/xadministrator/Documents/DONOTDELETE/YourUnitBackground.jpg DefaultDesktop.jpg
+
+------------------------------------------------------
+[TECH TIP] Keychain
+------------------------------------------------------
+1. In First Aid tab, ensure "set login keychain as default" is deselected
+2. In First Aid tab, ensure "keep login keychain unlocked" is deselected
+3. In Certificates tab, ensure OCSP and CRL are set to "best attempt"
+4. Priority should be set to "OCSP"
+
+
+---Happy Auditing/Remediating!
