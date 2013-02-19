@@ -1221,7 +1221,7 @@ echo ""
 read selection
 case $selection in
 		1 ) ls -lL /usr/sbin/traceroute ; exit_status ;;
-		2 ) chmod 700 /usr/bin/traceroute ; exit_status ;;
+		2 ) chmod 700 /usr/sbin/traceroute ; exit_status ;;
 		3 ) exit ;;
 	esac
 done
