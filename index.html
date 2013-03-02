@@ -1,0 +1,185 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>MAC OS X STIG Script by jackiesingh</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>MAC OS X STIG Script</h1>
+        <p>This script helps automate application of DISA STIGs (security config) to an OS X machine</p>
+
+        <p class="view"><a href="https://github.com/jackiesingh/Mac-OSX-STIG">View the Project on GitHub <small>jackiesingh/Mac-OSX-STIG</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/jackiesingh/Mac-OSX-STIG/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/jackiesingh/Mac-OSX-STIG/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/jackiesingh/Mac-OSX-STIG">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>Note: If you were sent here by Apple's federal team welcome. If you have problems with this, I may be able to help, depending on my schedule.</h1>
+
+<h1>Post an issue for bugs, or email me directly.</h1>
+
+<h1>OS X 10.6 Audit/Remediation Script Package</h1>
+
+<h1>Based on DISA Mac OS X 10.6 STIG Draft, Version 1, Release .01, 18 Aug 2011</h1>
+
+<h1>2011, Jackie Singh</h1>
+
+<p>Instructions:</p>
+
+<ol>
+<li><p>Login to Mac OS X machine you wish to check/remediate for STIG compliance;</p></li>
+<li><p>Copy the entire "OSX-10.6-SRR-Basic" folder to your Desktop;</p></li>
+<li><p>Recommend you quickly review/skim over the below tech tips;</p></li>
+<li><p>Run the "Terminal" application (It is in the Applications/Utilities folder);</p></li>
+<li><p>Enter the following commands (verbatim) in the Terminal window:
+3a) sudo su
+3b) cd "/Users/$SUDO_USER/Desktop/OSX-10.6-SRR"
+3c) mkdir logs-$HOSTNAME
+3d) chmod +x script.sh bin/part1.sh bin/part2.sh bin/part3.sh
+3e) TODAYSDATE=<code>date +%d-%b-%Y.%H%M</code> 
+3f) system_profiler &gt; logs-$HOSTNAME/system_profiler_$TODAYSDATE.log
+3g) ./script.sh 2&gt;&amp;1 | tee logs-$HOSTNAME/script.$TODAYSDATE.log</p></li>
+</ol><hr><h2>[PREREQ] Recovery</h2>
+
+<p>Recommend installing 'applejack' (<a href="http://applejack.sourceforge.net">http://applejack.sourceforge.net</a>), to ensure you have an easy way to fix problems in single user mode, should they occur (they will most likely occur). You can enter single-user mode by holding down 'command key + s' on boot.</p>
+
+<hr><h2>[TECH TIP] Sudo setuid bit</h2>
+
+<p>If you mess up and can't sudo to root anymore, run 'applejack' in single-user mode. WARNING: If you run 'applejack' without booting into single-user mode, you could bork the entire system!</p>
+
+<hr><h2>[IAVA PREREQ] MacPorts and XCode</h2>
+
+<p>For IAVA compliance, you will need to install MacPorts to upgrade (at a minimum) OpenSSL (openssl version; port install openssl) and PHP (php -v; port install php5). To install MacPorts, you will need XCode first, which is available on the OS X Install DVD (OEM). You can also download the .dmg (disk image) from Apple.</p>
+
+<hr><h2>[IAVA PREREQ] Retina</h2>
+
+<p>To scan with Retina, you will need to enable the SSH daemon (SSHD) in "System Preferences" --&gt; Sharing (disable when complete); you must add an entry for the Retina server in /etc/hosts; and ensure you turn off the firewall before scanning and re-enable when complete.</p>
+
+<hr><h2>[TECH TIP] Software utilities you might need</h2>
+
+<ol>
+<li>BatChmod;</li>
+<li>MacPorts;</li>
+<li>AppleJack (mentioned above);</li>
+<li>Disk Inventory X.</li>
+</ol><p>Google them.</p>
+
+<hr><h2>[TECH TIP] IAVA Updates</h2>
+
+<ol>
+<li>Update all system software;</li>
+<li>Update approved third-party software;</li>
+<li>Ensure Adobe products such as flash and Acrobat Reader/Pro are upgraded.</li>
+</ol><hr><h2>[TECH TIP] Logging</h2>
+
+<p>Your logs will not be overwritten, even if you have to ctrl+c/break out of the script. Each will be date/time stamped for your review and will be available in the logs/ directory. However be advised they may become very large if the script hangs and you must forcefully kill terminal, and the child process continues to output error data.</p>
+
+<hr><h2>[TECH TIP] Script Sequence</h2>
+
+<p>The script is split into three parts (part1, part2, part3). The main script.sh will take you through all three in sequence, although you may wish to run them individually.</p>
+
+<hr><h2>[TECH TIP] Using 'locate' instead of 'find'</h2>
+
+<p>Run this command to update the "locate" database (optional) launchctl load -w /System/Library/LaunchDaemons/com.apple.locate.plist</p>
+
+<hr><h2>[TECH TIP] Kext Cache</h2>
+
+<p>This command will rebuild the extension cache (in case something breaks) kextcache -m Extensions.mkext -z /System/Library/Extensions</p>
+
+<hr><h2>[TECH TIP] Disable internal mic</h2>
+
+<p>Disable the internal microphone by reducing the input volume to 0</p>
+
+<ul>
+<li>Launch System Preferences</li>
+<li>Click on "Sound"</li>
+<li>Click on the "Input" tab</li>
+<li>Drag the "Input volume" slider all the way to the left, as seen in the above screenshot</li>
+<li>Close System Preferences</li>
+</ul><p>Disable the internal microphone by selecting a different audio input</p>
+
+<ul>
+<li>Launch the System Preferences</li>
+<li>Click on "Sound"</li>
+<li>Click on the "Input" tab</li>
+<li>Select "Line-in"</li>
+<li>Close System Preferences</li>
+</ul><p>Additionally recommend vinyl label tape over microphone with text stating:
+"Microphone Disabled per IA; POC: J6 Information Assurance DSN:"</p>
+
+<hr><h2>[TECH TIP] Disable internal camera</h2>
+
+<p>To disable: mv /System/Library/PrivateFrameworks/CoreMediaIOServices.framework/Versions/A/Resources/VDC.plugin/Contents/MacOS/VDC /System/Library/PrivateFrameworks/CoreMediaIOServices.framework/Versions/A/Resources/VDC.plugin/Contents/MacOS/_VDC</p>
+
+<p>To enable: mv /System/Library/PrivateFrameworks/CoreMediaIOServices.framework/Versions/A/Resources/VDC.plugin/Contents/MacOS/_VDC /System/Library/PrivateFrameworks/CoreMediaIOServices.framework/Versions/A/Resources/VDC.plugin/Contents/MacOS/VDC</p>
+
+<p>Additionally recommend vinyl label tape over camera with text stating:
+"Camera Disabled per IA; POC: J6 Information Assurance DSN:"</p>
+
+<hr><h2>[TECH TIP] Accounts</h2>
+
+<ol>
+<li>Add user xAdministrator, set password to meet system reqs</li>
+<li>Ensure "xAdministrator" user has administrative privilege</li>
+<li>Add password to user "user account" set password to meet system reqs</li>
+<li>Downgrade "user account" account to have standard, non-administrative privilege</li>
+<li><p>Ensure "Guest" account is disabled and no other accounts exist on the workstation (confirm with unit prior to deletion to ensure no data loss)</p></li>
+<li><p>System Preferences --&gt; Security --&gt; General</p></li>
+<li><p>Disable Automatic Login should be on</p></li>
+<li><p>Require password to unlock System Prefs pane should be on</p></li>
+<li><p>Disable location services should be on</p></li>
+<li><p>Require password "immediately" after sleep or screen saver begins</p></li>
+<li><p>Enable secure virtual memory.</p></li>
+</ol><hr><h2>[TECH TIP] Firewall</h2>
+
+<ol>
+<li>System Preferences --&gt; Security --&gt; Firewall</li>
+<li>Enable/start the firewall, and block all incoming connections except required.</li>
+</ol><hr><h2>[TECH TIP] Disable access to System Preferences</h2>
+
+<ol>
+<li>Disable access: sudo chmod 700 /Applications/System\ Preferences.app</li>
+<li>Enable access: sudo chmod 774 /Applications/System\ Preferences.app</li>
+</ol><hr><h2>[TECH TIP] Background, Login Background, &amp; Screen Saver</h2>
+
+<ol>
+<li>Create folder in xAdministrator Documents folder titled "DONOTDELETE"</li>
+<li>Copy YourUnitBackground.jpg to "DONOTDELETE"</li>
+<li>Set YourUnitBackground.jpg as desktop background</li>
+<li>Set screen saver to choose from "DONODELETE" folder</li>
+<li>Change login background:
+5a. cd /System/Library/CoreServices
+5b. mv DefaultDesktop.jpg DefaultDesktop_old.jpg
+5c. cp /Users/xadministrator/Documents/DONOTDELETE/YourUnitBackground.jpg DefaultDesktop.jpg</li>
+</ol><hr><h2>[TECH TIP] Keychain</h2>
+
+<ol>
+<li>In First Aid tab, ensure "set login keychain as default" is deselected</li>
+<li>In First Aid tab, ensure "keep login keychain unlocked" is deselected</li>
+<li>In Certificates tab, ensure OCSP and CRL are set to "best attempt"</li>
+<li>Priority should be set to "OCSP"</li>
+</ol><p>---Happy Auditing/Remediating!</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/jackiesingh">jackiesingh</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
