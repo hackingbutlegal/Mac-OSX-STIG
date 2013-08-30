@@ -71,7 +71,7 @@ echo -n "Enter your selection:  "
 echo ""
 read selection
 case $selection in
-		1 ) cat /etc/resolv.conf | greo nameserver ; exit_status ;;
+		1 ) cat /etc/resolv.conf | grep nameserver ; exit_status ;;
 		2 ) echo "[FIX] If less than two lines are returned that are not commented out, this is a finding. Edit the /etc/resolv.conf and add additional 'nameserver' lines until at least two are present." ; press_enter ;;
 		3 ) exit ;;
 		
